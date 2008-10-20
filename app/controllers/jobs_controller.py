@@ -37,7 +37,7 @@ class JobsController(ApplicationController):
             self.render_view('jobs/new.html')
 
     def compute(self):
-        job = Job.job(self.request.GET.get('id'))
+        job = Job.job(self.request.get('id'))
         
         self.view['job'] = job
         self.render_view('jobs/compute.html')
@@ -58,8 +58,12 @@ class JobsController(ApplicationController):
         PUT /jobs/1
         url_for('job', id=1)
         """
-        id=self.request.GET.get('id')
-        job_form = JobForm(data=self.request.POST)
+        job = Job.job(self.request.get('id'))
+        
+        job_form = JobForm(instance=job, data=self.request.POST)
+
+        logging.info("Found Job %s" % str(id))
+        logging.info("Post :%s - %s" % (str(self.request.__class__), str(self.request.arguments())))
 
         if job_form.is_valid():
             job = job_form.save()
@@ -77,7 +81,7 @@ class JobsController(ApplicationController):
         DELETE /jobs/1
         url_for('job', id=1)
         """
-        job = Job.job(self.request.GET.get('id'))
+        job = Job.job(self.request.get('id'))
         job.delete()
         
         self.redirect_to(url_for('jobs'))
@@ -87,9 +91,8 @@ class JobsController(ApplicationController):
         GET /jobs/1
         url_for('jobs', id=1)
         """
-        job = Job.job(job_id=self.request.GET.get('id'))
-        logging.error("Found Job %s: %s" % (str(self.request.GET.get('id')), str(job)))
-        
+        job = Job.job(job_id=self.request.get('id'))
+                
         self.view['job'] = job
         self.render_view('jobs/show.html')
 
@@ -98,7 +101,7 @@ class JobsController(ApplicationController):
         GET /jobs/1;edit
         url_for('edit_job', id=1)
         """
-        job = Job.job(job_id=self.request.GET.get('id'))
+        job = Job.job(job_id=self.request.get('id'))
         job_form = JobForm(instance=job)
 
         self.view['job_form'] = job_form
@@ -107,5 +110,5 @@ class JobsController(ApplicationController):
 
 
     def resource(self):
-        job = Job.job(job_id=self.request.GET.get('id'))
+        job = Job.job(job_id=self.request.get('id'))
         self.redirect_to(job.resource_url)

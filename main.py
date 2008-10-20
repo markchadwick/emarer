@@ -39,8 +39,6 @@ class Router(webapp.RequestHandler):
       self.request.GET[param] = value
     
     logging.error(controller)
-    logging.error(self.request.environ)
-    logging.error(self.request.GET)
     # import and instantiate the correct controller and call the action/method
     __import__('app.controllers.' + controller['controller'] + '_controller')
     eval("app.controllers." + controller['controller'] +"_controller." + controller['controller'].capitalize() + "Controller(self.request, self.response, self)." + controller['action'] + '()')
