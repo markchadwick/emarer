@@ -18,7 +18,7 @@ def escapejs(value):
     """
     Backslash-escapes characters for use in JavaScript strings.
     """
-    if not value:
+    if not value or value == 'None':
         return ''
         
     for bad, good in _js_escapes:

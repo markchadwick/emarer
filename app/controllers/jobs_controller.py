@@ -68,8 +68,8 @@ class JobsController(ApplicationController):
         url  = urlparse(self.request.body)
         
 
-        data = dict([part.split('=') for part in url[2].split('&')])
-        data = dict([(k, unquote_plus(v)) for (k,v) in data.items()])
+        data = [part.split('=') for part in url[2].split('&')]
+        data = dict([(k, unquote_plus(v)) for (k,v) in data if v != 'None'])
         logging.info("DATA: %s" % str(data))
         job_form = JobForm(instance=job, data=data)
 
