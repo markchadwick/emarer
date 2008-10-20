@@ -1,0 +1,22 @@
+<html>
+  <head>
+    <title>Emarer - {% block title %}{% endblock %}</title>
+    
+    {% block stylesheets %}
+        <link rel="stylesheet" href="/stylesheets/blueprint/screen.css" type="text/css" media="screen, projection">
+        <link rel="stylesheet" href="/stylesheets/blueprint/print.css" type="text/css" media="print">    
+        <!--[if IE]><link rel="stylesheet" href="/stylesheets/blueprint/ie.css" type="text/css" media="screen, projection"><![endif]-->
+    {% endblock %}
+
+    {% block javascripts %}
+        <script type="text/javascript" src="/javascripts/jquery.js"></script>
+    {% endblock %}
+
+  </head>
+  <body>
+    <div class="container">
+        <h1>emarer</h1>
+        {% block main %}{% endblock %}
+    </div><!-- .container -->
+  </body>
+</html>
