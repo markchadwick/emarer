@@ -3,6 +3,9 @@ from framework.routes.util import url_for
 from app.models.job import Job
 from app.forms.job_form import JobForm
 
+from urlparse import urlparse
+from urllib import unquote_plus
+
 import logging
 
 class JobsController(ApplicationController):
@@ -57,13 +60,18 @@ class JobsController(ApplicationController):
         """
         PUT /jobs/1
         url_for('job', id=1)
-        """
-        job = Job.job(self.request.get('id'))
         
-        job_form = JobForm(instance=job, data=self.request.POST)
+        TODO: Figure out why the framework doesn't take care of parsing this
+              kinda shit for me.  It's a PUT statement.  What's the big deal?
+        """
+        job  = Job.job(self.request.get('id'))
+        url  = urlparse(self.request.body)
+        
 
-        logging.info("Found Job %s" % str(id))
-        logging.info("Post :%s - %s" % (str(self.request.__class__), str(self.request.arguments())))
+        data = dict([part.split('=') for part in url[2].split('&')])
+        data = dict([(k, unquote_plus(v)) for (k,v) in data.items()])
+        logging.info("DATA: %s" % str(data))
+        job_form = JobForm(instance=job, data=data)
 
         if job_form.is_valid():
             job = job_form.save()
