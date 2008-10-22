@@ -1,17 +1,19 @@
 application: emarer
 version: 1
-runtime: python
 api_version: 1
+runtime: python
+
+default_expiration: "4d 5h"
 
 handlers:
-- url: /resources
-  static_dir: public/resources
-
-- url: /javascripts
-  static_dir: public/javascripts
-  
-- url: /stylesheets
-  static_dir: public/stylesheets  
-  
+- url: /css
+  static_dir: assets/css
+- url: /js
+  static_dir: assets/js
+- url: /img
+  static_dir: assets/img
+- url: /favicon.ico
+  static_files: favicon.ico
+  upload: favicon.ico
 - url: .*
   script: main.py
