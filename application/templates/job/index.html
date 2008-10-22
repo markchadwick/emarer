@@ -7,7 +7,7 @@
 
     <ul>
         {% for job in jobs %}
-            <li><a href="/job/{{ job.key }}">{{ job.name }}</a></li>
+            <li><a href="{% url_for 'job' job.key %}">{{ job.name }}</a></li>
         {% endfor %}
     </ul>
 

@@ -33,25 +33,29 @@ escapejs = register.filter(escapejs)
 # ------------------------------------------------------------------------------
 # Routing Utils
 # ------------------------------------------------------------------------------
+import gaeo
+from gaeo.dispatch import router
 
 from django.template import Node, resolve_variable
-
-def route_for(*args, **kwds):
-    return "/a/b/c/d"
 
 class UrlNode(Node):
     def __init__(self, action, id=None):
         self.action = action
         self.id     = id
+        self.router = router.Router()
 
     def render(self, context):
         action = resolve_variable(self.action, context)
     
-        if self.id is None:
-            return route_for(action)
-        else:
-            actual_id = resolve_variable(self.id, context)
-            return route_for(action, id=actual_id)
+        try:
+            if self.id is None:
+                return self.router.url_for(action)
+            else:
+                actual_id = resolve_variable(self.id, context)
+                return self.router.url_for(action, id=actual_id)
+                
+        except:
+            return "Horrible Death"
 
 def url_for(parser, token):
     tokens = list(token.split_contents())
