@@ -1,0 +1,11 @@
+{% extends "../layouts/main.html" %}
+
+{% block main %}
+<h2>Edit Job</h2>
+
+<form action="{% url_for 'job' job.key %}" method="POST" enctype="application/x-www-form-urlencoded">
+  {% include '_form.html' %}
+  <input type="hidden" name="_method" value="put"/>
+  <input type="submit" value="Update Job"/>  
+</form>
+{% endblock %}

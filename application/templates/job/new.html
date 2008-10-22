@@ -1,0 +1,10 @@
+{% extends "../layouts/main.html" %}
+
+{% block main %}
+<h2>New job</h2>
+
+<form action="{% url_for 'jobs' %}" method="post">
+  {% include '_form.html' %}
+  <input type="submit" value="Create Job"/>  
+</form>
+{% endblock %}
