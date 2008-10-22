@@ -1,7 +1,5 @@
 from gaeo.controller import BaseController
 
-from framework.routes.util import url_for
-
 from model.job import Job
 from forms.job_form import JobForm
 
