@@ -3,13 +3,13 @@
 {% block title %}Jobs{% endblock %}
 
 {% block main %}
-<h2>Jobs</h2>
+    <h2>Jobs</h2>
 
-<ul>
-    {% for job in jobs %}
-        <li><a href="/job/{{ job.key }}">{{ job.name }}</a></li>
-    {% endfor %}
-</ul>
+    <ul>
+        {% for job in jobs %}
+            <li><a href="/job/{{ job.key }}">{{ job.name }}</a></li>
+        {% endfor %}
+    </ul>
 
-<a href="/job/new">New Job</a>
+    <a href="/job/new">New Job</a>
 {% endblock %}

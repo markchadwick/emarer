@@ -5,6 +5,7 @@ import sys
 import wsgiref.handlers
 
 from google.appengine.ext import webapp
+from google.appengine.ext.webapp.template import register_template_library
 
 # use zipped gaeo
 try:
@@ -20,10 +21,11 @@ from gaeo.dispatch import router
 
 def initRoutes():
     r = router.Router()
-    
-    #TODO: add routes here
 
     r.connect('/:controller/:action/:id')
+
+def initTemplateLibraries():
+    register_template_library('templatetags')
 
 def initPlugins():
     """
@@ -53,6 +55,8 @@ def main():
         os.path.dirname(__file__), 'application', 'templates')
 
     initRoutes()
+    initTemplateLibraries()
+    
     # initialize the installed plugins
     initPlugins()
 
