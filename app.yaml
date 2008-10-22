@@ -6,12 +6,12 @@ runtime: python
 default_expiration: "4d 5h"
 
 handlers:
-- url: /css
-  static_dir: assets/css
-- url: /js
-  static_dir: assets/js
-- url: /img
-  static_dir: assets/img
+- url: /stylesheets
+  static_dir: assets/stylesheets
+- url: /javascripts
+  static_dir: assets/javascripts
+- url: /images
+  static_dir: assets/images
 - url: /favicon.ico
   static_files: favicon.ico
   upload: favicon.ico
