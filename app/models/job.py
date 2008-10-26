@@ -1,4 +1,19 @@
 from google.appengine.ext import db
+from lib.http_utils import asset_size
+
+import math
+import logging
+
+# ------------------------------------------------------------------------------
+# Configuration
+# ------------------------------------------------------------------------------
+
+DEFAULT_MAP_BYTES    = 1000
+DEFAULT_NUM_REDUCERS = 15
+
+# ------------------------------------------------------------------------------
+# Implementation
+# ------------------------------------------------------------------------------
 
 class Job(db.Model):
     
@@ -10,14 +25,12 @@ class Job(db.Model):
 
     mapper  = db.StringProperty(multiline=True)
     combiner= db.StringProperty(multiline=True)
-    
     reducer = db.StringProperty(multiline=True)
     
-    num_reducers = 15
-
-    resource_url = db.StringProperty()
-    num_mappers  = db.IntegerProperty()
-    num_reducers = db.IntegerProperty()
+    resource_url  = db.StringProperty()
+    resource_size = db.IntegerProperty()
+    num_mappers   = db.IntegerProperty()
+    num_reducers  = db.IntegerProperty()
     
     map_complete = db.BooleanProperty(default=False)
     complete     = db.BooleanProperty(default=False)
@@ -56,11 +69,20 @@ class Job(db.Model):
         from app.models.map_task import MapTask
         self._delete_map_tasks()
         
-        totally_incorrect_num_map_tasks = 1
+        self.resource_size = asset_size(self.resource_url)
         
-        for i in range(totally_incorrect_num_map_tasks):
-            MapTask(job=self, start_byte=0, end_byte=1000000).save()
+        num_map_tasks = self.resource_size / float(DEFAULT_MAP_BYTES)
+        num_map_tasks = int(math.ceil(num_map_tasks))
+        self.num_mappers = num_map_tasks
+
+        for i in range(num_map_tasks):
+            start_byte = i * DEFAULT_MAP_BYTES
+            end_byte   = ((i+1) * DEFAULT_MAP_BYTES) - 1
+            end_byte   = self.resource_size if end_byte > self.resource_size else end_byte
+            MapTask(job=self, start_byte=start_byte, end_byte=end_byte).save()
         
+        self.put()
+
     def create_reduce_tasks(self):
         """
         Create a pre-determined number of reducers for a job.  This number,
@@ -76,8 +98,11 @@ class Job(db.Model):
         from app.models.reduce_task import ReduceTask
         self._delete_reduce_tasks()
         
-        for i in range(self.num_reducers):
-            ReduceTaks(job=self).save()
+        for i in range(DEFAULT_NUM_REDUCERS):
+            ReduceTask(job=self).save()
+            
+        self.num_reduce_tasks = DEFAULT_NUM_REDUCERS
+        self.put()
         
     def next_task(self):
         """
@@ -88,7 +113,36 @@ class Job(db.Model):
         :returns: Next task which needs to be executed to complete this job, or
                   `None` if no such job exists.
         """
-        unimplemented
+        logging.error('- ' * 30)
+        logging.error('Complete? %s' % str(self.complete))
+        if self.complete:
+            return None
+        
+        #
+        # Find available Map tasks
+        #
+        if not self.map_complete:
+            task = self._next_map_task()
+            if task is None:
+                self.map_complete = True
+                self.save()
+                return self.next_task()
+            else:
+                return task
+                
+        #
+        # Find available Reduce tasks
+        #
+        
+        else:
+            task = self._next_reduce_task()
+            
+            if task is None:
+                self.complete = True
+                save.save()
+                return None
+            else:
+                return task
         
     # --------------------------------------------------------------------------
     # Private Methods
@@ -98,11 +152,37 @@ class Job(db.Model):
         """
         Deletes all Map Tasks which reference this Job as their owner.
         """
-        self.map_tasks.delete()
+        db.delete(self.map_tasks)
         
     def _delete_reduce_tasks(self):
         """
         Deletes all Reduce Tasks which reference this Job as their owner.
         """
-        self.reduce_tasks.delete()
+        db.delete(self.reduce_tasks)
+        
+    def _next_map_task(self):
+        return self._next_task(self.map_tasks)
+
+    def _next_reduce_task(self):
+        #
+        # TODO: WTF do I need this here?
+        #
+        from app.models.reduce_task import ReduceTask
+        return self._next_task(self.reduce_tasks)
+        
+    def _next_task(self, tasks):
+        """
+        Iterate twice through the given tasks for this Job.  During the first
+        iteration, it will return any job which is unclaimed.  During the second
+        iteration, it will return any job which is not complete.
+        """
+        for task in tasks:
+            if not task.claimed:
+                return task
+        
+        for task in taks:
+            if not task.complete:
+                return task
+        
+        return None
         

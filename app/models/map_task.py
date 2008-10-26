@@ -9,3 +9,10 @@ class MapTask(Task):
     start_byte = db.IntegerProperty()
     end_byte   = db.IntegerProperty()
     
+
+    def json_params(self):
+        return {
+            'task_type':    'map',
+            'start_byte':   self.start_byte,
+            'end_byte':     self.end_byte,
+        }

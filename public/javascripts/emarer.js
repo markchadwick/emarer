@@ -6,14 +6,17 @@ jQuery.fn.emarer = function(settings) {
         combiner:   'null',
         reducer:    'null',
         
-        max_emitted: 1000,
+        max_emitted: 2000,
         context:    'local',
+        local_id:   jQuery.uuid()
     }, settings);
     
     ////////////////////////////////////////////////////////////////////////////
     // Fields
     var _emitted = [];
     var _num_emitted = 0;
+    var _flush_num   = 0;
+    var _stage = null;
     
     ////////////////////////////////////////////////////////////////////////////
     // Public Methods
@@ -55,6 +58,10 @@ jQuery.fn.emarer = function(settings) {
      */
     function _flush_emitted() {
         var emit_values = new Object();
+        var local_id    = settings.local_id;
+        var job_id      = settings.job_id;
+        var action      = '/jobs/' + _stage + '_update/' + job_id + 
+                          '?local_id='+ local_id +'&flush_num=' + _flush_num;
         
         jQuery.each(_emitted, function(i, kv) {
             var key = kv[0];
@@ -67,7 +74,8 @@ jQuery.fn.emarer = function(settings) {
             }
         });
         
-        console.log("Emitting", emit_values);
+        jQuery.post(action, emit_values);
+        _flush_num += 1;
         _reset_emitted();
     }
     
@@ -81,6 +89,16 @@ jQuery.fn.emarer = function(settings) {
         _num_emitted = 0;
     }
     
+    /*
+     * A special event sent to the server to let it know that it know that this
+     * client has successfully completed a Map task.  If the server doesn't
+     * recieve this message, this task will never be marked as complete, and
+     * will eventually be delegated to another client.
+     */
+    function _send_map_complete() {
+        var local_id = settings.local_id;
+        console.log('Client', local_id, ' Map Complete');
+    }
     
     function _fetch_resource() {
         var data;
@@ -103,6 +121,9 @@ jQuery.fn.emarer = function(settings) {
         jQuery.each(lines, function(i, line) {
             map_func(null, jQuery.trim(line));
         });
+        
+        _flush_emitted();
+        _send_map_complete();
     }
     
     function _perform_reduce(reduce_func, emitted_key_vals) {
@@ -139,23 +160,46 @@ jQuery.fn.emarer = function(settings) {
         return new_array;
     }
     
+    function _compile_error(name, e) {
+        console.log("Compeile error in", name, ": ", e);
+    }
+    
     ////////////////////////////////////////////////////////////////////////////
     // Main
     
     function main() {
         var data = _fetch_resource();
         var lines = data.split('\n');
-        var map_func, red_func;
         
-        eval("map_func = " + settings.mapper);
-        eval("com_func = " + settings.combiner);
-        eval("red_func = " + settings.reducer);
+        var map_func = null;
+        var com_func = null;
+        var red_func = null;
+        
+        try {
+            eval("map_func = " + settings.mapper);
+        } catch(e) {
+            _compile_error('Map', e);
+        }
+        
+        try {
+            eval("com_func = " + settings.combiner);
+        } catch(e) {
+            _compile_error('Combine', e);
+        }
+        
+        try {
+            eval("red_func = " + settings.reducer);
+        } catch(e) {
+            _compile_error('Reduce', e);
+        }
         
         if(map_func) {
+            _stage = 'map';
             _perform_map(map_func, lines);
         }
         
         if(red_func) {
+            _stage = 'reduce';
             _perform_reduce(red_func, _clone_array(_emitted));
         }
     }

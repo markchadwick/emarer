@@ -19,6 +19,7 @@
 
     <ul>
         <li><a href="/jobs/compute/{{ job.key }}">Compute</a></li>
+        <li><a href="/jobs/next_task/{{ job.key }}">Next Task</a></li>
         <li><a href="{% url_for 'edit_job' job.key %}">Edit</a></li>
         <li><a href="/jobs/delete/{{ job.key }}">Delete</a></li>
     </ul>

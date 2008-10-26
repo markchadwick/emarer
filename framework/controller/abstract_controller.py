@@ -19,7 +19,7 @@ class AbstractController():
     
   def render_text(self, text):
     """docstring for render_text"""
-    self.response.headers['Content-Type'] = 'text/text'
+    self.response.headers['Content-Type'] = 'text/plain'
     self.response.out.write(text)
     
   def render_xml(self, xml):

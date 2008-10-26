@@ -22,6 +22,6 @@ def escapejs(value):
         return ''
         
     for bad, good in _js_escapes:
-        value = value.replace(bad, good) 
+        value = str(value).replace(bad, good) 
     return value 
 escapejs = register.filter(escapejs) 

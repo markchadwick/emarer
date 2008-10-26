@@ -1,6 +1,8 @@
 from application_controller import ApplicationController
 from framework.routes.util import url_for
 from app.models.job import Job
+from app.models.map_task import MapTask
+from app.models.reduce_task import ReduceTask
 from app.forms.job_form import JobForm
 
 from urlparse import urlparse
@@ -30,8 +32,8 @@ class JobsController(ApplicationController):
 
         if job_form.is_valid():
             job = job_form.save()
-#            job.create_map_tasks()
-#            job.create_reduce_tasks()
+            job.create_map_tasks()
+            job.create_reduce_tasks()
 
             self.redirect_to(url_for('jobs'))
 
@@ -44,7 +46,15 @@ class JobsController(ApplicationController):
         
         self.view['job'] = job
         self.render_view('jobs/compute.html')
+
+    def next_task(self):
+        job  = Job.job(self.request.get('id'))
+        task = job.next_task()
         
+        if task is None:
+            self.render_text('{}')
+        else:
+            self.render_text(task.as_json())
 
     def new(self):
         """
@@ -75,8 +85,8 @@ class JobsController(ApplicationController):
 
         if job_form.is_valid():
             job = job_form.save()
-#            job.create_map_tasks()
-#            job.create_reduce_tasks()
+            job.create_map_tasks()
+            job.create_reduce_tasks()
             
             self.redirect_to(url_for('jobs', job.key))
 
@@ -120,3 +130,7 @@ class JobsController(ApplicationController):
     def resource(self):
         job = Job.job(job_id=self.request.get('id'))
         self.redirect_to(job.resource_url)
+        
+    def map_update(self):
+        pass
+        

@@ -1,11 +1,13 @@
 <html><head><title>Compute {{ job.name|escape }}</title>
     <script type="text/javascript" src="/javascripts/jquery.js"></script>
+    <script type="text/javascript" src="/javascripts/jquery.uuid.js"></script>
     <script type="text/javascript" src="/javascripts/emarer.js"></script>
 
     <script type="text/javascript">
         $(document).ready(function() {
             var mapred = jQuery.fn.emarer({
-                resource:   "{{ job.resource_url|escape }}",
+                job_id:     "{{ job.key|escapejs }}",
+                resource:   "{{ job.resource_url|escapejs }}",
                 mapper:     "{{ job.mapper|escapejs }}",
                 {% if job.combiner %}combiner: "{{ job.combiner|escapejs }}",{% endif %}
                 {% if job.reducer  %}reducer:  "{{ job.reducer|escapejs }}",{% endif %}
@@ -13,5 +15,5 @@
         });
     </script>
 </head><body>
-hi
+Computing {{ job.name }}
 </body></html>
