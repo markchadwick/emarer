@@ -21,7 +21,8 @@ class MapTask(Task):
             map_value = reducer.map_values
 
         for key, value in params.items():
-            map_values[hash(key)%num_reducers].append(str(((key, value))))
+            db_val = str(key) + '\t' + str(value)
+            map_values[hash(key)%num_reducers].append(db_val)
             
         for reducer, map_value in zip(reducers, map_values):
             reducer.map_values = map_value

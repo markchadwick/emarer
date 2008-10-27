@@ -25,7 +25,31 @@ jQuery.fn.Task = function(settings, callback) {
         });
         
         _flush_emitted();
-
+    }
+    
+    function _perform_reduce_task(data, reduce_func) {
+        var last_key     = null;
+        var value_buffer = [];
+        
+        jQuery.each(data, function(i, key_val) {
+            var key = key_val[0];
+            var val = key_val[1];
+            
+            if((last_key != null) && (key != last_key)) {
+                reduce_func(last_key, value_buffer);
+                
+                value_buffer = [];
+            }
+            
+            value_buffer.push(val);
+            last_key = key;
+        });
+        
+        if(last_key != null) {
+            reduce_func(last_key, value_buffer);
+        }
+        
+        _flush_emitted();
     }
     
     function _flush_emitted() {
@@ -68,6 +92,7 @@ jQuery.fn.Task = function(settings, callback) {
                 eval("mapper = "+ settings.mapper);
             } catch(e) {
                 _compilation_error('Mapper', e);
+                return;
             }
             
             try {
@@ -77,7 +102,19 @@ jQuery.fn.Task = function(settings, callback) {
             }
             
             _perform_map_task(settings.data, mapper, combiner);
+            
         } else {
+            var reducer = null;
+            var data    = settings.data;
+            
+            try {
+                eval("reducer = "+ settings.reducer);
+            } catch(e) {
+                _compilation_error('Reducer', e);
+                return;
+            }
+
+            _perform_reduce_task(data, reducer);
         }
     }
     main();

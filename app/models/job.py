@@ -26,6 +26,7 @@ class Job(db.Model):
     mapper  = db.StringProperty(multiline=True)
     combiner= db.StringProperty(multiline=True)
     reducer = db.StringProperty(multiline=True)
+    output  = db.StringProperty(multiline=True)
     
     resource_url  = db.StringProperty()
     resource_size = db.IntegerProperty()
@@ -178,7 +179,7 @@ class Job(db.Model):
             if not task.claimed:
                 return task
         
-        for task in taks:
+        for task in tasks:
             if not task.complete:
                 return task
         
