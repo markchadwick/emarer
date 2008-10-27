@@ -54,6 +54,8 @@ class JobsController(ApplicationController):
         if task is None:
             self.render_text('{}')
         else:
+            task.claimed = True
+            task.save()
             self.render_text(task.as_json())
 
     def new(self):

@@ -81,7 +81,7 @@ class Job(db.Model):
             end_byte   = self.resource_size if end_byte > self.resource_size else end_byte
             MapTask(job=self, start_byte=start_byte, end_byte=end_byte).save()
         
-        self.put()
+        self.save()
 
     def create_reduce_tasks(self):
         """
@@ -113,8 +113,6 @@ class Job(db.Model):
         :returns: Next task which needs to be executed to complete this job, or
                   `None` if no such job exists.
         """
-        logging.error('- ' * 30)
-        logging.error('Complete? %s' % str(self.complete))
         if self.complete:
             return None
         

@@ -1,17 +1,27 @@
 <html><head><title>Compute {{ job.name|escape }}</title>
     <script type="text/javascript" src="/javascripts/jquery.js"></script>
     <script type="text/javascript" src="/javascripts/jquery.uuid.js"></script>
-    <script type="text/javascript" src="/javascripts/emarer.js"></script>
+    <script type="text/javascript" src="/javascripts/task.js"></script>
 
     <script type="text/javascript">
-        $(document).ready(function() {
-            var mapred = jQuery.fn.emarer({
-                job_id:     "{{ job.key|escapejs }}",
-                resource:   "{{ job.resource_url|escapejs }}",
-                mapper:     "{{ job.mapper|escapejs }}",
-                {% if job.combiner %}combiner: "{{ job.combiner|escapejs }}",{% endif %}
-                {% if job.reducer  %}reducer:  "{{ job.reducer|escapejs }}",{% endif %}
+        function fetch_task() {
+            var url = "/jobs/next_task/{{ job.key|escapejs }}";
+            var task_data = null;
+            
+            $.get(url, {}, function(data) {
+                try {
+                    eval("task_data="+ data);
+                } catch(e) {
+                    console.log("Error", e);
+                }
+                
+                jQuery.fn.Task(task_data, fetch_task);
+                setTimeout(fetch_task, 5000);
             });
+        }
+        
+        $(document).ready(function() {
+            fetch_task();
         });
     </script>
 </head><body>
